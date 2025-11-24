@@ -1,10 +1,16 @@
-import "dotenv/config";   // Loads the .env file
+import express from "express";
+import dotenv from "dotenv";
 import { connectDB } from "./config/db";
+import categoryRoutes from "./routes/category.routes";
 
-const startApp = async () => {
-  await connectDB();  // This will tell you if DB connected or not
+dotenv.config();
+connectDB();
 
-  console.log("App started successfully!");
-};
+const app = express();
+app.use(express.json());
 
-startApp();
+app.use("/api/categories", categoryRoutes);
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});
