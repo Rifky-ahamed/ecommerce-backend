@@ -3,14 +3,16 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db";
 import categoryRoutes from "./routes/category.routes";
 import productRoutes from "./routes/product.routes";
+import cors from "cors";
 
 dotenv.config();
 connectDB();
 
+
 const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
-
+app.use(cors({ origin: "http://localhost:3000" }));
 // category routes
 app.use("/api/categories", categoryRoutes);
 
