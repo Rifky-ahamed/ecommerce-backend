@@ -2,7 +2,7 @@
 
 
 import { useEffect, useState } from "react";
-import { getCategories, createCategory } from "../services/api";
+import { getCategories, createCategory, getProducts } from "../services/api";
 
 type Category = {
   _id: string;
@@ -10,14 +10,30 @@ type Category = {
   description?: string;
 };
 
+type Product = {
+  _id: string;
+  name: string;
+  price: number;
+  stock?: string;
+  category?: string; 
+};
+
+
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
     fetchCategories();
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    const data = await getProducts();
+    setProducts(data);
+  }
 
   const fetchCategories = async () => {
     const data = await getCategories();
@@ -32,6 +48,7 @@ export default function Home() {
     fetchCategories();
   };
 
+  
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Categories</h1>
@@ -62,6 +79,15 @@ export default function Home() {
           </li>
         ))}
       </ul>
+      <h2 className="text-xl font-bold mt-6 mb-4">Products</h2>
+<ul>
+  {products.map((prod) => (
+    <li key={prod._id}>
+  {prod.name} - ${prod.price} - {prod.stock} - {prod.category || "No Category"}
+</li>
+
+  ))}
+</ul>
     </div>
   );
 }
