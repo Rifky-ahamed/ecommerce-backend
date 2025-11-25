@@ -1,8 +1,7 @@
 "use client";
-
-
 import { useEffect, useState } from "react";
-import { getCategories, createCategory, getProducts } from "../services/api";
+import { getCategories, createCategory, getProducts, createProduct } from "../services/api";
+
 
 type Category = {
   _id: string;
@@ -24,6 +23,10 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [productName, setProductName] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [stock, setStock] = useState("");
+  
 
   useEffect(() => {
     fetchCategories();

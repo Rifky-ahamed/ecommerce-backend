@@ -19,4 +19,12 @@ export const getProducts = async () => {
   return res.json();
 };
 
+export const createProduct = async (data: { name: string; price: number; stock: string; categoryId: string }) => {
+  const res = await fetch(`${API_URL}/products`, {
+    method: "POST", 
+   headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};
 // Add similar methods for create/update/delete products
