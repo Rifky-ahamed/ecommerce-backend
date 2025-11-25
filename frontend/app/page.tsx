@@ -24,9 +24,10 @@ export default function Home() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState<number | "">("");
+  const [price, setPrice] = useState<number>(0);
   const [stock, setStock] = useState("");
-  
+  const [categoryName, setCategoryName] = useState("");
+
 
   useEffect(() => {
     fetchCategories();
@@ -82,7 +83,67 @@ export default function Home() {
           </li>
         ))}
       </ul>
-      <h2 className="text-xl font-bold mt-6 mb-4">Products</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">Add Product</h2>
+<form
+  onSubmit={async (e) => {
+    e.preventDefault();
+    await createProduct({
+      name: productName,
+      price,
+      stock,
+      categoryName: categoryName, // ❗ Wrong here (we will change below)
+    });
+    setProductName("");
+    setPrice(0);
+    setStock("");
+    setCategoryName("");
+    fetchProducts();
+  }}
+  className="mb-4 flex flex-col gap-2"
+>
+  <input
+    type="text"
+    placeholder="Product Name"
+    value={productName}
+    onChange={(e) => setProductName(e.target.value)}
+    className="border p-2 rounded"
+    required
+  />
+
+  <input
+    type="number"
+    placeholder="Price"
+    value={price}
+    onChange={(e) => setPrice(Number(e.target.value))}
+     className="border p-2 rounded [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    required
+  />
+
+  <input
+    type="text"
+    placeholder="Stock"
+    value={stock}
+    onChange={(e) => setStock(e.target.value)}
+    className="border p-2 rounded"
+  />
+
+  <select
+    className="border p-2 rounded"
+    onChange={(e) => setCategoryName(e.target.value)}
+  >
+    <option value="">Select Category</option>
+    {categories.map((c) => (
+      <option key={c._id} value={c.name}>
+        {c.name}
+      </option>
+    ))}
+  </select>
+
+  <button type="submit" className="bg-green-600 text-white p-2 rounded">
+    Add Product
+  </button>
+</form>
+
 <ul>
   {products.map((prod) => (
     <li key={prod._id}>
