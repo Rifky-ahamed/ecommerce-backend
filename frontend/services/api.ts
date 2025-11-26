@@ -1,37 +1,79 @@
+import axios from "axios";
+
 const API_URL = "http://localhost:5000/api"; // your backend
 
+// ---------- CATEGORY METHODS ----------
+
+// Get all categories
 export const getCategories = async () => {
-  const res = await fetch(`${API_URL}/categories`);
-  return res.json();
+  const res = await axios.get(`${API_URL}/categories`);
+  return res.data;
 };
 
+// Create a category
 export const createCategory = async (data: { name: string; description?: string }) => {
-  const res = await fetch(`${API_URL}/categories`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return res.json();
+  const res = await axios.post(`${API_URL}/categories`, data);
+  return res.data;
 };
 
+// Get category by ID
+export const getCategoryById = async (id: string) => {
+  const res = await axios.get(`${API_URL}/categories/${id}`);
+  return res.data;
+};
+
+// Update category
+export const updateCategory = async (id: string, data: { name: string; description?: string }) => {
+  const res = await axios.put(`${API_URL}/categories/${id}`, data);
+  return res.data;
+};
+
+// Delete category
+export const deleteCategory = async (id: string) => {
+  const res = await axios.delete(`${API_URL}/categories/${id}`);
+  return res.data;
+};
+
+// ---------- PRODUCT METHODS ----------
+
+// Get products with pagination
 export const getProducts = async (page: number = 1, limit: number = 10) => {
-  const res = await fetch(`${API_URL}/products?page=${page}&limit=${limit}`);
-  return res.json();
+  const res = await axios.get(`${API_URL}/products?page=${page}&limit=${limit}`);
+  return res.data;
 };
 
+// Create a product
 export const createProduct = async (data: {
   name: string;
   price: number;
   stock?: string;
-  categoryId?: string;    // optional
-  categoryName?: string;  // optional
+  categoryId?: string;
+  categoryName?: string;
 }) => {
-  const res = await fetch(`${API_URL}/products`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return res.json();
+  const res = await axios.post(`${API_URL}/products`, data);
+  return res.data;
 };
 
-// Add similar methods for create/update/delete products
+// Get product by ID
+export const getProductById = async (id: string) => {
+  const res = await axios.get(`${API_URL}/products/${id}`);
+  return res.data;
+};
+
+// Update product
+export const updateProduct = async (id: string, data: {
+  name?: string;
+  price?: number;
+  stock?: string;
+  categoryId?: string;
+  categoryName?: string;
+}) => {
+  const res = await axios.put(`${API_URL}/products/${id}`, data);
+  return res.data;
+};
+
+// Delete product
+export const deleteProduct = async (id: string) => {
+  const res = await axios.delete(`${API_URL}/products/${id}`);
+  return res.data;
+};

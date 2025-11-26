@@ -5,12 +5,22 @@ import mongoose from "mongoose";
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
-    const category = await Category.create(req.body);
+    const nameLower = req.body.name.toLowerCase();
+
+    // Check if category already exists
+    const existingCategory = await Category.findOne({ name: nameLower });
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
+
+    // Save new category with lowercase name
+    const category = await Category.create({ ...req.body, name: nameLower });
     res.status(201).json(category);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
@@ -34,22 +44,37 @@ export const getCategoryById = async (req: Request, res: Response) => {
   }
 };
 
-// Update category
 export const updateCategory = async (req: Request, res: Response) => {
   try {
+    const categoryId = req.params.id;
+    const nameLower = req.body.name.toLowerCase();
+
+    // Check if another category with the same name exists
+    const existingCategory = await Category.findOne({ 
+      name: nameLower, 
+      _id: { $ne: categoryId } // exclude current category
+    });
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category name already exists" });
+    }
+
+    // Update category
     const updatedCategory = await Category.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true } // return updated document
+      categoryId,
+      { ...req.body, name: nameLower },
+      { new: true, runValidators: true }
     );
+
     if (!updatedCategory) {
       return res.status(404).json({ message: "Category not found" });
     }
+
     res.status(200).json(updatedCategory);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 export const deleteCategory = async (req: Request, res: Response) => {
   try {
