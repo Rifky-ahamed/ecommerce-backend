@@ -1,8 +1,10 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api"; // your backend
+const API_URL = "http://localhost:5000/api";
 
-// ---------- CATEGORY METHODS ----------
+// ============================================
+// CATEGORY API
+// ============================================
 
 // Get all categories
 export const getCategories = async () => {
@@ -10,7 +12,7 @@ export const getCategories = async () => {
   return res.data;
 };
 
-// Create a category
+// Create category
 export const createCategory = async (data: { name: string; description?: string }) => {
   const res = await axios.post(`${API_URL}/categories`, data);
   return res.data;
@@ -34,15 +36,17 @@ export const deleteCategory = async (id: string) => {
   return res.data;
 };
 
-// ---------- PRODUCT METHODS ----------
+// ============================================
+// PRODUCT API
+// ============================================
 
-// Get products with pagination
+// Get paginated products
 export const getProducts = async (page: number = 1, limit: number = 10) => {
   const res = await axios.get(`${API_URL}/products?page=${page}&limit=${limit}`);
   return res.data;
 };
 
-// Create a product
+// Create product
 export const createProduct = async (data: {
   name: string;
   price: number;
@@ -61,13 +65,16 @@ export const getProductById = async (id: string) => {
 };
 
 // Update product
-export const updateProduct = async (id: string, data: {
-  name?: string;
-  price?: number;
-  stock?: string;
-  categoryId?: string;
-  categoryName?: string;
-}) => {
+export const updateProduct = async (
+  id: string,
+  data: {
+    name?: string;
+    price?: number;
+    stock?: string;
+    categoryId?: string;
+    categoryName?: string; // backend will lowercase + validate
+  }
+) => {
   const res = await axios.put(`${API_URL}/products/${id}`, data);
   return res.data;
 };
