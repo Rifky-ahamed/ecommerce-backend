@@ -143,3 +143,105 @@ export const deleteProduct = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Invalid product ID" });
   }
 };
+
+export const searchProducts = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.query;
+
+    if (!name) {
+      return res.status(400).json({ message: "Search term (name) is required" });
+    }
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const skip = (page - 1) * limit;
+
+    // Case-insensitive search using regex
+    const query = {
+      name: { $regex: new RegExp(name as string, "i") },
+    };
+
+    const products = await Product.find(query)
+      .populate<PopulatedCategory>("categoryId", "name -_id")
+      .skip(skip)
+      .limit(limit);
+
+    const formatted = products.map((prod: any) => ({
+      _id: prod._id,
+      name: prod.name,
+      price: prod.price,
+      stock: prod.stock,
+      category: prod.categoryId?.name || null,
+    }));
+
+    const total = await Product.countDocuments(query);
+
+    res.status(200).json({
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data: formatted,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Failed to search products", error });
+  }
+};
+
+export const filterProductsByCategory = async (req: Request, res: Response) => {
+  try {
+    const { categoryId, categoryName } = req.query;
+
+    // Pagination (optional)
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    let finalCategoryId = categoryId;
+
+    // If categoryName is sent → convert lowercase → find category
+    if (!finalCategoryId && categoryName) {
+      const lowerName = (categoryName as string).toLowerCase();
+      const category = await Category.findOne({ name: lowerName });
+
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      finalCategoryId = category._id.toString();
+    }
+
+    if (!finalCategoryId) {
+      return res.status(400).json({ message: "categoryId or categoryName required" });
+    }
+
+    // Fetch products by category
+    const products = await Product.find({ categoryId: finalCategoryId })
+      .populate("categoryId", "name -_id")
+      .skip(skip)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments({ categoryId: finalCategoryId });
+
+    const formattedProducts = products.map((prod: any) => ({
+      _id: prod._id,
+      name: prod.name,
+      price: prod.price,
+      stock: prod.stock,
+      category: prod.categoryId?.name || null,
+    }));
+
+    res.status(200).json({
+      total: totalProducts,
+      page,
+      limit,
+      totalPages: Math.ceil(totalProducts / limit),
+      data: formattedProducts,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Failed to filter products", error });
+  }
+};
