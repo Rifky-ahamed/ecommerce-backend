@@ -14,8 +14,8 @@ export const createCategory = async (data: { name: string; description?: string 
   return res.json();
 };
 
-export const getProducts = async () => {
-  const res = await fetch(`${API_URL}/products`);
+export const getProducts = async (page: number = 1, limit: number = 10) => {
+  const res = await fetch(`${API_URL}/products?page=${page}&limit=${limit}`);
   return res.json();
 };
 

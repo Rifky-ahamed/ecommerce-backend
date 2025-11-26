@@ -39,9 +39,20 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await Product.find().populate<PopulatedCategory>("categoryId", "name -_id");
+    // 1️⃣ Read page & limit from query
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-    // Map to format the response
+    // 2️⃣ Calculate skip
+    const skip = (page - 1) * limit;
+
+    // 3️⃣ Fetch paginated products + populate
+    const products = await Product.find()
+      .populate<PopulatedCategory>("categoryId", "name -_id")
+      .skip(skip)
+      .limit(limit);
+
+    // 4️⃣ Format the response
     const formattedProducts = products.map((prod: any) => ({
       _id: prod._id,
       name: prod.name,
@@ -50,7 +61,17 @@ export const getProducts = async (req: Request, res: Response) => {
       category: prod.categoryId?.name || null,
     }));
 
-    res.status(200).json(formattedProducts);
+    // 5️⃣ Total product count (for frontend pagination buttons)
+    const totalProducts = await Product.countDocuments();
+
+    res.status(200).json({
+      total: totalProducts,
+      page,
+      limit,
+      totalPages: Math.ceil(totalProducts / limit),
+      data: formattedProducts,
+    });
+
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch products", error });
   }
