@@ -5,19 +5,21 @@ import Category from "../models/category.model" ;
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    console.log("REQ BODY:", req.body);  // 👈 LOG 1
-
     const { name, price, stock, categoryId, categoryName } = req.body;
+
     let finalCategoryId = categoryId;
 
+    // Convert categoryName → lowercase and check
     if (!finalCategoryId && categoryName) {
-      const category = await Category.findOne({ name: categoryName });
-      console.log("FOUND CATEGORY:", category);  // 👈 LOG 2
-      if (!category) return res.status(400).json({ message: "Category not found" });
+      const lowerName = categoryName.toLowerCase();
+
+      const category = await Category.findOne({ name: lowerName });
+      if (!category) {
+        return res.status(400).json({ message: "Category not found" });
+      }
+
       finalCategoryId = category._id.toString();
     }
-
-    console.log("FINAL CATEGORY ID:", finalCategoryId); // 👈 LOG 3
 
     const product = await Product.create({
       name,
@@ -26,14 +28,13 @@ export const createProduct = async (req: Request, res: Response) => {
       categoryId: finalCategoryId,
     });
 
-    console.log("PRODUCT CREATED:", product); // 👈 LOG 4
-
     res.status(201).json(product);
+
   } catch (error: any) {
-    console.error(error); // 👈 LOG 5 ERROR
     res.status(400).json({ message: error.message });
   }
 };
+
 
 
 
@@ -74,5 +75,71 @@ export const getProducts = async (req: Request, res: Response) => {
 
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch products", error });
+  }
+};
+
+export const getProductById = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate<PopulatedCategory>("categoryId", "name");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(product);
+  } catch (error: any) {
+    res.status(400).json({ message: "Invalid product ID" });
+  }
+};
+
+
+export const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const { name, price, stock, categoryId, categoryName } = req.body;
+
+    let finalCategoryId = categoryId;
+
+    // If categoryName is sent → lowercase → check in DB
+    if (!finalCategoryId && categoryName) {
+      const lowerName = categoryName.toLowerCase();
+
+      const category = await Category.findOne({ name: lowerName });
+      if (!category) {
+        return res.status(400).json({ message: "Category not found" });
+      }
+
+      finalCategoryId = category._id.toString();
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { name, price, stock, categoryId: finalCategoryId },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(updatedProduct);
+
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+ 
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error: any) {
+    res.status(400).json({ message: "Invalid product ID" });
   }
 };
