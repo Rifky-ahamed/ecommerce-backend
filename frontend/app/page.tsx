@@ -52,7 +52,7 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    if (!window.confirm("Are you suver you want to delete this category?")) return;
     try {
       await deleteCategory(id);
       fetchCategories();
