@@ -1,0 +1,263 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "E-Commerce API Documentation",
+    "version": "1.0.0",
+    "description": "Swagger documentation for the E-Commerce Backend API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/categories": {
+      "post": {
+        "tags": ["Categories"],
+        "summary": "Create a new category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" },
+              "example": { "name": "Electronics" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Category created successfully" },
+          "400": { "description": "Category already exists" }
+        }
+      },
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get all categories",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Category" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/categories/{id}": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get category by ID",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdParam" }
+        ],
+        "responses": {
+          "200": { "description": "Category found" },
+          "404": { "description": "Category not found" }
+        }
+      },
+      "put": {
+        "tags": ["Categories"],
+        "summary": "Update category",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdParam" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Category updated" },
+          "404": { "description": "Category not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Categories"],
+        "summary": "Delete category",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdParam" }
+        ],
+        "responses": {
+          "200": { "description": "Category deleted successfully" },
+          "400": { "description": "Category is linked with products" },
+          "404": { "description": "Category not found" }
+        }
+      }
+    },
+
+    "/products": {
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create a new product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProductInput" },
+              "example": {
+                "name": "iPhone 15",
+                "price": 1500,
+                "stock": "50",
+                "categoryId": "679ac23b4fd"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Product created successfully" },
+          "400": { "description": "Validation error or category not found" }
+        }
+      },
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products (with pagination)",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of paginated products" }
+        }
+      }
+    },
+
+    "/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdParam" }
+        ],
+        "responses": {
+          "200": { "description": "Product found" },
+          "404": { "description": "Product not found" }
+        }
+      },
+      "put": {
+        "tags": ["Products"],
+        "summary": "Update a product",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdParam" }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProductInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Product updated" },
+          "404": { "description": "Product not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Products"],
+        "summary": "Delete a product",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdParam" }
+        ],
+        "responses": {
+          "200": { "description": "Product deleted" },
+          "404": { "description": "Product not found" }
+        }
+      }
+    },
+
+    "/products/search": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Search products by name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "List of products" },
+          "400": { "description": "Search term missing" }
+        }
+      }
+    },
+
+    "/products/filter": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Filter products by category",
+        "parameters": [
+          { "name": "categoryId", "in": "query", "schema": { "type": "string" } },
+          { "name": "categoryName", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Filtered products" },
+          "404": { "description": "Category not found" }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "CategoryInput": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" }
+        }
+      },
+
+      "Category": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      },
+
+      "ProductInput": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "string" },
+          "categoryId": { "type": "string" },
+          "categoryName": { "type": "string" }
+        }
+      }
+    },
+
+    "parameters": {
+      "IdParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" }
+      }
+    }
+  }
+}
